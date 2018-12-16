@@ -10,12 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  image: ^2.0.4
+  path_provider: ^0.4.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  image: ^2.0.4
-  path_provider: ^0.4.1
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
 
