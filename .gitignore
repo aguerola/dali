@@ -8,3 +8,10 @@ build/
 ios/.generated/
 ios/Flutter/Generated.xcconfig
 ios/Runner/GeneratedPluginRegistrant.*
+dali.iml
+lib/generated/
+pubspec.lock
+*.iml
+res/
+.flutter-plugins
+.metadata
