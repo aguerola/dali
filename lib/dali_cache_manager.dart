@@ -122,6 +122,9 @@ class DaliCacheManager {
   static CompressionResult compress(Uint8List data, int width, int height) {
     if (debug) print("Compressing image: $width $height");
     Image image = decodeImage(data);
+    if (image == null) {
+      return CompressionResult(CompressionResult.RESULT_NOT_SUPPORTED, data);
+    }
     if (width < image.width && height < image.height) {
       image = copyResize(image, width);
       data = encodeJpg(image);
@@ -134,7 +137,7 @@ class DaliCacheManager {
 class CompressionResult {
   static const RESULT_OK = 0;
   static const RESULT_SAME_IMAGE = 1;
-  static const RESULT_EXCEPTION = 2;
+  static const RESULT_NOT_SUPPORTED = 2;
   final int result;
   final Uint8List data;
 
