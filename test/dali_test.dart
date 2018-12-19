@@ -16,6 +16,16 @@ void main() {
 
     await delete(dest);
   });
+  test('resize to smaller image 2', () async {
+    File orig = File("test_images/plain_512_512.png");
+    File dest = File("temporary_directory/plain_100_100.png");
+    await delete(dest);
+    await convertAndSaveInBackground(orig, dest, 95, 60);
+
+    expect(await dest.exists(), true);
+
+    //await delete(dest);
+  });
 
   test('resize unsupported image', () async {
     File orig = File("test_images/sails.bmp");

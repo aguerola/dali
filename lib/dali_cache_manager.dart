@@ -144,7 +144,7 @@ class CompressionResult {
   CompressionResult(this.result, this.data);
 }
 
-Future<void> convertAndSaveInBackground(File fileOrig, File fileDestination, int width, int height) async {
+Future<bool> convertAndSaveInBackground(File fileOrig, File fileDestination, int width, int height) async {
   if (debug) print("convertAndSaveInBackground - init");
   List<int> bytes = await fileOrig.readAsBytes();
 
@@ -159,11 +159,16 @@ Future<void> convertAndSaveInBackground(File fileOrig, File fileDestination, int
         /// you can specify the positional arguments here
         positionalArgs: [bytes, width, height]);
     if (result.result == CompressionResult.RESULT_OK) {
-      await fileDestination.writeAsBytes(result.data);
       if (debug) print("convertAndSaveInBackground - saving resized image");
+      await fileDestination.writeAsBytes(result.data);
+      if (debug) print("convertAndSaveInBackground - end");
+      return true;
     } else if (result.result == CompressionResult.RESULT_SAME_IMAGE) {
       await fileDestination.writeAsBytes([]);
+      if (debug) print("convertAndSaveInBackground - end");
+      return true;
     }
   }
   if (debug) print("convertAndSaveInBackground - end");
+  return false;
 }
