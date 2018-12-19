@@ -6,7 +6,6 @@ import 'package:dali/site.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:ui' as ui;
 import 'package:image/image.dart';
-import 'package:path_provider/path_provider.dart';
 
 final bool debug = true;
 
@@ -16,7 +15,19 @@ class DaliCacheManager {
 
   DaliCacheManager(this.cacheFolder);
 
-  //var lock = new Object();
+  int getRoundedSize(int size) {
+    if (size <= 50) {
+      return 50;
+    } else if (50 < size && size <= 400) {
+      return size - size % 50;
+    } else if (400 < size && size <= 1000) {
+      return size - size % 100;
+    } else if (1000 < size && size <= 2000) {
+      return size - size % 200;
+    } else {
+      return 2000;
+    }
+  }
 
   Future<File> getFile(String url, int width, int height) async {
     if (width != null) {
@@ -31,6 +42,8 @@ class DaliCacheManager {
   static var site = new Site(new SiteSetting(4, new Duration(seconds: 10)));
 
   Future<File> downloadFile(String url, int width, int height) async {
+    width = getRoundedSize(width);
+    height = getRoundedSize(height);
     String filename = "${url.hashCode} - $width x $height";
 
     File file = new File('$cacheFolder/$filename');
