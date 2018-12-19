@@ -35,6 +35,7 @@ class ImageCacheImpl extends ImageCache {
   ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader()) {
     assert(key != null);
     assert(loader != null);
+    print("putIfAbsent");
     ImageStreamCompleter result = _cache[key];
     if (result != null) {
       // Remove the provider from the list so that we can put it back in below

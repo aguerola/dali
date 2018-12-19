@@ -1,7 +1,7 @@
 import 'package:dali/image_cache_impl.dart';
 import 'package:flutter/widgets.dart';
 
-class DaliImageCache extends WidgetsFlutterBinding {
+class DaliCacheBinding extends WidgetsFlutterBinding {
   @override
   ImageCache createImageCache() {
     // Set your image cache size
@@ -11,7 +11,7 @@ class DaliImageCache extends WidgetsFlutterBinding {
   }
 
   static WidgetsBinding ensureInitialized() {
-    if (WidgetsBinding.instance == null) new DaliImageCache();
+    if (WidgetsBinding.instance == null) new DaliCacheBinding();
     return WidgetsBinding.instance;
   }
 }

@@ -8,6 +8,7 @@ import 'package:dali/dali_cache_manager.dart';
 import 'dart:ui' as ui show instantiateImageCodec, Codec;
 
 import 'package:dali/cached_image.dart';
+import 'package:path_provider/path_provider.dart';
 
 class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvider> {
   /// Creates an ImageProvider which loads an image from the [url], using the [scale].
@@ -25,7 +26,7 @@ class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvide
 
   final int width;
   final int height;
-  final bool debug = false;
+  final bool debug = true;
 
   /// Listener to be called when images fails to load.
   final ErrorListener errorListener;
@@ -54,9 +55,9 @@ class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvide
     /*var cacheManager = await CacheManager.getInstance();
     var file = await cacheManager.getFile(url, headers: headers);*/
 
-    var cacheManager = new DaliCacheManager();
+    var cacheManager = new DaliCacheManager((await getTemporaryDirectory()).path);
     var file = await cacheManager.getFile(url, width, height);
-
+    if(debug) print("size: ${await file.length()/1000}kb");
     if (file == null) {
       if (errorListener != null) errorListener();
       throw new Exception("Couldn't download or retreive file.");
