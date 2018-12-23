@@ -15,6 +15,8 @@ class DaliCacheManager {
 
   DaliCacheManager(this.cacheFolder);
 
+  static var site = new Site(new SiteSetting(4, new Duration(seconds: 10)));
+
   int getRoundedSize(int size) {
     if (size <= 50) {
       return 50;
@@ -38,8 +40,6 @@ class DaliCacheManager {
     }
     return downloadFile(url, width, height);
   }
-
-  static var site = new Site(new SiteSetting(4, new Duration(seconds: 10)));
 
   Future<File> downloadFile(String url, int width, int height) async {
     width = getRoundedSize(width);

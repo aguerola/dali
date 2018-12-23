@@ -57,12 +57,17 @@ class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvide
 
     var cacheManager = new DaliCacheManager((await getTemporaryDirectory()).path);
     var file = await cacheManager.getFile(url, width, height);
-    if(debug) print("size: ${await file.length()/1000}kb");
+    if (debug) print("size: ${await file.length() / 1000}kb");
     if (file == null) {
       if (errorListener != null) errorListener();
       throw new Exception("Couldn't download or retreive file.");
     }
-    return await _loadAsyncFromFile(key, file);
+    try {
+      return await _loadAsyncFromFile(key, file);
+    } catch (e) {
+      print(e);
+      errorListener();
+    }
   }
 
   Future<ui.Codec> _loadAsyncFromFile(CachedNetworkImageProvider key, File file) async {
