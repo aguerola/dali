@@ -22,6 +22,6 @@ Then you can load an image in a container:
 Container(
   height: 200,
   width: 200,
-  child: Dali(imageUrl: images[index]),
+  child: Dali(imageUrl: 'https://homepages.cae.wisc.edu/~ece533/images/airplane.png'),
 )
 ```
