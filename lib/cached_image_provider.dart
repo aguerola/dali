@@ -68,6 +68,7 @@ class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvide
       print(e);
       errorListener();
     }
+    return null;
   }
 
   Future<ui.Codec> _loadAsyncFromFile(CachedNetworkImageProvider key, File file) async {

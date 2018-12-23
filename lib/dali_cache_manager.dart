@@ -18,7 +18,9 @@ class DaliCacheManager {
   static var site = new Site(new SiteSetting(4, new Duration(seconds: 10)));
 
   int getRoundedSize(int size) {
-    if (size <= 50) {
+    if (size == null) {
+      return 2000;
+    } else if (size <= 50) {
       return 50;
     } else if (50 < size && size <= 400) {
       return size - size % 50;

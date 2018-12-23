@@ -18,13 +18,13 @@ void main() {
   });
   test('resize to smaller image 2', () async {
     File orig = File("test_images/plain_512_512.png");
-    File dest = File("temporary_directory/plain_100_100.png");
+    File dest = File("temporary_directory/plain_95_60.png");
     await delete(dest);
     await convertAndSaveInBackground(orig, dest, 95, 60);
 
     expect(await dest.exists(), true);
 
-    //await delete(dest);
+    await delete(dest);
   });
 
   test('resize unsupported image', () async {
@@ -130,6 +130,28 @@ void main() {
     await delete(file);
     await delete(file400);
     await delete(file1000);
+  });
+
+
+  test('download null size downloads 2000x2000', () async {
+    var cacheManager = new DaliCacheManager("temporary_directory");
+    var file = File('temporary_directory/315137417');
+    var resizedEmpty = File('temporary_directory/315137417 - 2000 x 2000');
+
+    await delete(file);
+    await delete(resizedEmpty);
+
+    expect(await file.exists(), false);
+    expect(await resizedEmpty.exists(), false);
+
+    await cacheManager.downloadFile("https://homepages.cae.wisc.edu/~ece533/images/airplane.png", null, null);
+    await Future.delayed(const Duration(seconds: 1), () => "1");
+
+    expect(await file.exists(), true);
+    expect(await resizedEmpty.exists(), true);
+
+    await delete(file);
+    await delete(resizedEmpty);
   });
 }
 
