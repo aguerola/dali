@@ -1,3 +1,8 @@
+## [0.0.4] - 23/12/2018
+
+* Error detection to show errorWidget
+* Added BoxFit param to Dali class
+
 ## [0.0.3] - 23/12/2018
 
 * bug fixing
