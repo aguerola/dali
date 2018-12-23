@@ -50,7 +50,7 @@ void main() {
   });
 
   test('download image', () async {
-    var cacheManager = new DaliCacheManager("temporary_directory");
+    var cacheManager = new DaliCacheManager(cacheFolder : "temporary_directory", downloader: DownloaderImpl(),);
     var file = File('temporary_directory/315137417');
     var file400 = File('temporary_directory/315137417 - 400 x 400');
 
@@ -71,7 +71,7 @@ void main() {
   });
 
   test('testing similar sizes', () async {
-    var cacheManager = new DaliCacheManager("temporary_directory");
+    var cacheManager = new DaliCacheManager(cacheFolder : "temporary_directory", downloader: DownloaderImpl(),);
 
     var file = File('temporary_directory/315137417');
     var file400 = File('temporary_directory/315137417 - 400 x 400');
@@ -100,7 +100,7 @@ void main() {
     await delete(file);
     await delete(file400);
     await delete(file1000);
-    var cacheManager = new DaliCacheManager("temporary_directory");
+    var cacheManager = new DaliCacheManager(cacheFolder : "temporary_directory", downloader: DownloaderImpl(),);
     File downloadedFile =
         await cacheManager.downloadFile("https://homepages.cae.wisc.edu/~ece533/images/airplane.png", 1000, 1000);
     await Future.delayed(const Duration(seconds: 2), () => "1");
@@ -134,7 +134,7 @@ void main() {
 
 
   test('download null size downloads 2000x2000', () async {
-    var cacheManager = new DaliCacheManager("temporary_directory");
+    var cacheManager = new DaliCacheManager(cacheFolder : "temporary_directory", downloader: DownloaderImpl(),);
     var file = File('temporary_directory/315137417');
     var resizedEmpty = File('temporary_directory/315137417 - 2000 x 2000');
 

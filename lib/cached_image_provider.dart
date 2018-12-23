@@ -13,7 +13,8 @@ import 'package:path_provider/path_provider.dart';
 class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvider> {
   /// Creates an ImageProvider which loads an image from the [url], using the [scale].
   /// When the image fails to load [errorListener] is called.
-  const CachedNetworkImageProvider(this.url,
+
+  CachedNetworkImageProvider(this.url,
       {this.scale: 1.0, this.width, this.height, this.errorListener, this.headers})
       : assert(url != null),
         assert(scale != null);
@@ -27,6 +28,8 @@ class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvide
   final int width;
   final int height;
   final bool debug = true;
+
+  DaliCacheManager cacheManager;
 
   /// Listener to be called when images fails to load.
   final ErrorListener errorListener;
@@ -51,13 +54,16 @@ class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvide
         });
   }
 
+
   Future<ui.Codec> _loadAsync(CachedNetworkImageProvider key) async {
     /*var cacheManager = await CacheManager.getInstance();
     var file = await cacheManager.getFile(url, headers: headers);*/
-
-    var cacheManager = new DaliCacheManager((await getTemporaryDirectory()).path);
+    if (cacheManager == null) {
+      cacheManager =
+      new DaliCacheManager(cacheFolder: (await getTemporaryDirectory()).path, downloader: DownloaderImpl());
+    }
     var file = await cacheManager.getFile(url, width, height);
-    if (debug) print("size: ${await file.length() / 1000}kb");
+
     if (file == null) {
       if (errorListener != null) errorListener();
       throw new Exception("Couldn't download or retreive file.");
@@ -75,7 +81,7 @@ class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvide
     assert(key == this);
 
     final Uint8List bytes = await file.readAsBytes();
-
+    if (debug) print("size: ${(bytes.lengthInBytes / (1024*1024)).toStringAsFixed(2)} MB");
     if (bytes.lengthInBytes == 0) {
       if (errorListener != null) errorListener();
       throw new Exception("File was empty");

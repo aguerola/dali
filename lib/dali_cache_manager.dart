@@ -10,10 +10,16 @@ import 'package:image/image.dart';
 final bool debug = true;
 
 class DaliCacheManager {
-  final String cacheFolder;
-  static var httpClient = new HttpClient();
+  static DaliCacheManager _instance;
 
-  DaliCacheManager(this.cacheFolder);
+  static get instance {
+    if (_instance == null) {}
+  }
+
+  final String cacheFolder;
+  final Downloader downloader;
+
+  DaliCacheManager({@required this.cacheFolder, @required this.downloader});
 
   static var site = new Site(new SiteSetting(4, new Duration(seconds: 10)));
 
@@ -44,8 +50,8 @@ class DaliCacheManager {
   }
 
   Future<File> downloadFile(String url, int width, int height) async {
-    width = getRoundedSize(width);
-    height = getRoundedSize(height);
+    width = (getRoundedSize(width)*0.7).toInt();
+    height = (getRoundedSize(height)*0.7).toInt();
     String filename = "${url.hashCode} - $width x $height";
 
     File file = new File('$cacheFolder/$filename');
@@ -58,7 +64,7 @@ class DaliCacheManager {
 
     if (!origExists && !exists) {
       if (debug) print("!origExists && !exists");
-      fileOrig = await downloadAndSave(url, fileOrig);
+      await downloader.downloadAndSave(url, fileOrig);
       if (width != null && height != null) {
         convertAndSaveInBackground(fileOrig, file, width, height);
       }
@@ -78,12 +84,12 @@ class DaliCacheManager {
     if (!origExists && exists) {
       if (!empty) {
         if (debug) print("!origExists && exists:OK  && !isEmpty");
-        downloadAndSave(url, fileOrig);
+        downloader.downloadAndSave(url, fileOrig);
         if (debug) print("return file");
         return file;
       } else {
         if (debug) print("!origExists && exists:OK && isEmpty");
-        fileOrig = await downloadAndSave(url, fileOrig);
+        await downloader.downloadAndSave(url, fileOrig);
         if (debug) print("return fileOrig");
         return fileOrig;
       }
@@ -100,27 +106,6 @@ class DaliCacheManager {
     }
   }
 
-  Future<File> downloadAndSaveInSite(String url, File file) async {
-    File fileOut = await DaliCacheManager.site.commission(downloadAndSave, positionalArgs: [url, file]);
-    return fileOut;
-  }
-
-  static Future<File> downloadAndSave(String url, File file) async {
-    if (debug) print("downloadAndSave - init");
-    var bytes = await download(url);
-    await file.writeAsBytes(bytes);
-    if (debug) print("downloadAndSave - end");
-    return file;
-  }
-
-  static Future<List<int>> download(String url) async {
-    if (debug) print("Downloading image: $url");
-    var request = await httpClient.getUrl(Uri.parse(url));
-    var response = await request.close();
-    Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-    return bytes;
-  }
-
   static CompressionResult compress(Uint8List data, int width, int height) {
     if (debug) print("Compressing image: $width $height");
     Image image = decodeImage(data);
@@ -133,6 +118,31 @@ class DaliCacheManager {
       return CompressionResult(CompressionResult.RESULT_OK, data);
     }
     return CompressionResult(CompressionResult.RESULT_SAME_IMAGE, data);
+  }
+}
+
+abstract class Downloader {
+  Future<void> downloadAndSave(String url, File file);
+}
+
+class DownloaderImpl implements Downloader {
+  static var httpClient = new HttpClient();
+
+  @override
+  Future<void> downloadAndSave(String url, File file) async {
+    if (debug) print("downloadAndSave - init");
+    var bytes = await download(url);
+    await file.writeAsBytes(bytes);
+    if (debug) print("downloadAndSave - end");
+    return null;
+  }
+
+  Future<List<int>> download(String url) async {
+    if (debug) print("Downloading image: $url");
+    var request = await httpClient.getUrl(Uri.parse(url));
+    var response = await request.close();
+    Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+    return bytes;
   }
 }
 
