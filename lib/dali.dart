@@ -11,15 +11,16 @@ class Dali extends StatelessWidget {
   final String imageUrl;
   final Widget placeholder;
   final Widget errorWidget;
+  final BoxFit fit;
 
-  Dali(this.imageUrl, {this.placeholder, this.errorWidget});
+  Dali(this.imageUrl, {this.placeholder, this.errorWidget, this.fit=BoxFit.cover});
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return CachedImage(
-          fit: BoxFit.cover,
+          fit: fit,
           imageUrl: imageUrl,
           width: constraints.maxWidth,
           height: constraints.maxHeight,
