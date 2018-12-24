@@ -1,5 +1,4 @@
 import 'package:dali/dali.dart';
-import 'package:dali/dali_cache_binding.dart';
 import 'package:flutter/material.dart';
 
 
@@ -29,9 +28,10 @@ const images = [
 ];
 
 void main() {
-  DaliCacheBinding.ensureInitialized()
-    ..attachRootWidget(MyApp())
-    ..scheduleWarmUpFrame();
+  runApp(MyApp());
+  /*DaliCacheBinding.ensureInitialized()
+    ..attachRootWidget()
+    ..scheduleWarmUpFrame();*/
 }
 
 class MyApp extends StatelessWidget {
