@@ -10,12 +10,12 @@ import 'dart:ui' as ui show instantiateImageCodec, Codec;
 import 'package:dali/cached_image.dart';
 import 'package:path_provider/path_provider.dart';
 
-class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvider> {
+
+class CachedNetworkImageProvider extends ImageProvider<DaliKey> {
   /// Creates an ImageProvider which loads an image from the [url], using the [scale].
   /// When the image fails to load [errorListener] is called.
 
-  CachedNetworkImageProvider(this.url,
-      {this.scale: 1.0, this.width, this.height, this.errorListener, this.headers})
+  CachedNetworkImageProvider(this.url, {this.width, this.height, this.errorListener, this.headers})
       : assert(url != null),
         assert(scale != null);
 
@@ -23,7 +23,7 @@ class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvide
   final String url;
 
   /// Scale of the image
-  final double scale;
+  final double scale=1.0;
 
   final int width;
   final int height;
@@ -38,12 +38,12 @@ class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvide
   final Map<String, String> headers;
 
   @override
-  Future<CachedNetworkImageProvider> obtainKey(ImageConfiguration configuration) {
-    return new SynchronousFuture<CachedNetworkImageProvider>(this);
+  Future<DaliKey> obtainKey(ImageConfiguration configuration) {
+    return new SynchronousFuture<DaliKey>(DaliKey(url, scale, width, height));
   }
 
   @override
-  ImageStreamCompleter load(CachedNetworkImageProvider key) {
+  ImageStreamCompleter load(DaliKey key) {
     if (debug) print("load!!!!");
     return new MultiFrameImageStreamCompleter(
         codec: _loadAsync(key),
@@ -54,13 +54,12 @@ class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvide
         });
   }
 
-
-  Future<ui.Codec> _loadAsync(CachedNetworkImageProvider key) async {
+  Future<ui.Codec> _loadAsync(DaliKey key) async {
     /*var cacheManager = await CacheManager.getInstance();
     var file = await cacheManager.getFile(url, headers: headers);*/
     if (cacheManager == null) {
       cacheManager =
-      new DaliCacheManager(cacheFolder: (await getTemporaryDirectory()).path, downloader: DownloaderImpl());
+          new DaliCacheManager(cacheFolder: (await getTemporaryDirectory()).path, downloader: DownloaderImpl());
     }
     var file = await cacheManager.getFile(url, width, height);
 
@@ -77,11 +76,11 @@ class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvide
     return null;
   }
 
-  Future<ui.Codec> _loadAsyncFromFile(CachedNetworkImageProvider key, File file) async {
-    assert(key == this);
+  Future<ui.Codec> _loadAsyncFromFile(DaliKey key, File file) async {
+    assert(key.hashCode == this.hashCode);
 
     final Uint8List bytes = await file.readAsBytes();
-    if (debug) print("size: ${(bytes.lengthInBytes / (1024*1024)).toStringAsFixed(2)} MB");
+    if (debug) print("size: ${(bytes.lengthInBytes / (1024 * 1024)).toStringAsFixed(2)} MB");
     if (bytes.lengthInBytes == 0) {
       if (errorListener != null) errorListener();
       throw new Exception("File was empty");
@@ -91,15 +90,47 @@ class CachedNetworkImageProvider extends ImageProvider<CachedNetworkImageProvide
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
-    final CachedNetworkImageProvider typedOther = other;
-    return url == typedOther.url && scale == typedOther.scale && width == this.width && height == this.height;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is DaliKey &&
+              url == other.url &&
+              scale == other.scale &&
+              width == other.width &&
+              height == other.height;
 
   @override
-  int get hashCode => hashValues(url, scale, width, height);
+  int get hashCode =>
+      url.hashCode ^
+      scale.hashCode ^
+      width.hashCode ^
+      height.hashCode;
 
   @override
   String toString() => '$runtimeType("$url", scale: $scale, size: ($width,$height))';
+}
+
+class DaliKey {
+  final String url;
+  final double scale;
+  final int width;
+  final int height;
+
+  DaliKey(this.url, this.scale, this.width, this.height);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is DaliKey &&
+              url == other.url &&
+              scale == other.scale &&
+              width == other.width &&
+              height == other.height;
+
+  @override
+  int get hashCode =>
+      url.hashCode ^
+      scale.hashCode ^
+      width.hashCode ^
+      height.hashCode;
+
 }

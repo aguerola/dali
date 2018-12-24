@@ -50,8 +50,8 @@ class DaliCacheManager {
   }
 
   Future<File> downloadFile(String url, int width, int height) async {
-    width = (getRoundedSize(width)*0.7).toInt();
-    height = (getRoundedSize(height)*0.7).toInt();
+    width = getRoundedSize(width).toInt();
+    height = getRoundedSize(height).toInt();
     String filename = "${url.hashCode} - $width x $height";
 
     File file = new File('$cacheFolder/$filename');

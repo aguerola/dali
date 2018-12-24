@@ -241,7 +241,7 @@ class _CachedNetworkImageState extends State<CachedImage> with TickerProviderSta
 
   @override
   void didChangeDependencies() {
-    _imageProvider.obtainKey(createLocalImageConfiguration(context)).then<void>((CachedNetworkImageProvider key) {
+    _imageProvider.obtainKey(createLocalImageConfiguration(context)).then<void>((DaliKey key) {
       if (CachedImage._registeredErrors.contains(key)) {
         setState(() => _hasError = true);
       }
@@ -366,7 +366,7 @@ class _CachedNetworkImageState extends State<CachedImage> with TickerProviderSta
   }
 
   void _imageLoadingFailed() {
-    _imageProvider.obtainKey(createLocalImageConfiguration(context)).then<void>((CachedNetworkImageProvider key) {
+    _imageProvider.obtainKey(createLocalImageConfiguration(context)).then<void>((DaliKey key) {
       if (!CachedImage._registeredErrors.contains(key)) {
         CachedImage._registeredErrors.add(key);
       }
