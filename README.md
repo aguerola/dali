@@ -1,21 +1,15 @@
 # Dalí
 
-An image loading and caching library for flutter. Supports iOS and Android.
-Dali is focused on speed and memory efficiency. It saves different versions of the original image in the local storage and cache.
-Once the image is downloaded, Dalí also makes copies of the image in different sizes in order to minimize the amount of memory used.
+An image loading and caching library for flutter focused on speed and memory efficiency.
 
+Supports iOS and Android.
+
+Dalí saves the downloaded image in memory in case the same image is requested in the future.
+Only a resized version with the desired size will be loaded in memory instead of loading the full size in order to preserve RAM memory.
+
+Images are saved in the cache directory of the app. This means the OS can delete the files any time.
 
 ## Getting Started
-
-Initialize Dali the app using this code:
-```
-void main() {
-  DaliImageCache.ensureInitialized()
-    ..attachRootWidget(MyApp())
-    ..scheduleWarmUpFrame();
-}
-```
-
 
 Then you can load an image in a container:
 ```

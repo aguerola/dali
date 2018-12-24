@@ -29,9 +29,6 @@ const images = [
 
 void main() {
   runApp(MyApp());
-  /*DaliCacheBinding.ensureInitialized()
-    ..attachRootWidget()
-    ..scheduleWarmUpFrame();*/
 }
 
 class MyApp extends StatelessWidget {
