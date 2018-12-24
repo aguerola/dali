@@ -1,3 +1,7 @@
+## [0.0.5] - 24/12/2018
+
+* Simplified set up of the library
+
 ## [0.0.4] - 23/12/2018
 
 * Error detection to show errorWidget
