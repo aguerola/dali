@@ -15,7 +15,7 @@ class CachedNetworkImageProvider extends ImageProvider<DaliKey> {
   /// Creates an ImageProvider which loads an image from the [url], using the [scale].
   /// When the image fails to load [errorListener] is called.
 
-  CachedNetworkImageProvider(this.url, {this.width, this.height, this.errorListener, this.headers})
+  CachedNetworkImageProvider(this.url, {this.width, this.height, this.errorListener, this.headers, this.scale=1.0})
       : assert(url != null),
         assert(scale != null);
 
@@ -23,7 +23,7 @@ class CachedNetworkImageProvider extends ImageProvider<DaliKey> {
   final String url;
 
   /// Scale of the image
-  final double scale=1.0;
+  final double scale;
 
   final int width;
   final int height;
