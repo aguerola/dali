@@ -11,11 +11,11 @@ import 'package:dali/cached_image.dart';
 import 'package:path_provider/path_provider.dart';
 
 
-class CachedNetworkImageProvider extends ImageProvider<DaliKey> {
+class DaliImageProvider extends ImageProvider<DaliKey> {
   /// Creates an ImageProvider which loads an image from the [url], using the [scale].
   /// When the image fails to load [errorListener] is called.
 
-  CachedNetworkImageProvider(this.url, {this.width, this.height, this.errorListener, this.headers, this.scale=1.0})
+  DaliImageProvider(this.url, {this.width, this.height, this.errorListener, this.headers, this.scale=1.0})
       : assert(url != null),
         assert(scale != null);
 

@@ -176,7 +176,7 @@ class _ImageProviderResolver {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
 
-  void resolve(CachedNetworkImageProvider provider) {
+  void resolve(DaliImageProvider provider) {
     final ImageStream oldImageStream = _imageStream;
     _imageStream = provider.resolve(createLocalImageConfiguration(state.context,
         size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null));
@@ -199,7 +199,7 @@ class _ImageProviderResolver {
 
 class _CachedNetworkImageState extends State<CachedImage> with TickerProviderStateMixin {
   _ImageProviderResolver _imageResolver;
-  CachedNetworkImageProvider _imageProvider;
+  DaliImageProvider _imageProvider;
 
   AnimationController _controller;
   Animation<double> _animation;
@@ -219,7 +219,7 @@ class _CachedNetworkImageState extends State<CachedImage> with TickerProviderSta
       width = widget.width.toInt();
       height = widget.height.toInt();
     }
-    _imageProvider = new CachedNetworkImageProvider(widget.imageUrl,width: width,height: height,
+    _imageProvider = new DaliImageProvider(widget.imageUrl,width: width,height: height,
         headers: widget.httpHeaders, errorListener: _imageLoadingFailed);
     _imageResolver = new _ImageProviderResolver(state: this, listener: _updatePhase);
 
@@ -261,7 +261,7 @@ class _CachedNetworkImageState extends State<CachedImage> with TickerProviderSta
         width = widget.width.toInt();
         height = widget.height.toInt();
       }
-      _imageProvider = new CachedNetworkImageProvider(widget.imageUrl,
+      _imageProvider = new DaliImageProvider(widget.imageUrl,
           width: width, height: height, errorListener: _imageLoadingFailed);
 
       _resolveImage();
