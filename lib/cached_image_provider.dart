@@ -10,12 +10,12 @@ import 'dart:ui' as ui show instantiateImageCodec, Codec;
 import 'package:dali/cached_image.dart';
 import 'package:path_provider/path_provider.dart';
 
-
 class DaliImageProvider extends ImageProvider<DaliKey> {
   /// Creates an ImageProvider which loads an image from the [url], using the [scale].
   /// When the image fails to load [errorListener] is called.
+  static bool debug = false;
 
-  DaliImageProvider(this.url, {this.width, this.height, this.errorListener, this.headers, this.scale=1.0})
+  DaliImageProvider(this.url, {this.width, this.height, this.errorListener, this.headers, this.scale = 1.0})
       : assert(url != null),
         assert(scale != null);
 
@@ -27,7 +27,6 @@ class DaliImageProvider extends ImageProvider<DaliKey> {
 
   final int width;
   final int height;
-  final bool debug = true;
 
   DaliCacheManager cacheManager;
 
@@ -45,33 +44,34 @@ class DaliImageProvider extends ImageProvider<DaliKey> {
   @override
   ImageStreamCompleter load(DaliKey key) {
     if (debug) print("load!!!!");
-    return new MultiFrameImageStreamCompleter(
-        codec: _loadAsync(key),
-        scale: key.scale,
-        informationCollector: (StringBuffer information) {
-          information.writeln('Image provider: $this');
-          information.write('Image key: $key');
-        });
+    try {
+      return new MultiFrameImageStreamCompleter(
+          codec: _loadAsync(key),
+          scale: key.scale,
+          informationCollector: (StringBuffer information) {
+            information.writeln('Image provider: $this');
+            information.write('Image key: $key');
+          });
+    } catch (e) {
+      if (debug) print(e);
+      if (errorListener != null) errorListener();
+
+      return null;
+    }
   }
 
   Future<ui.Codec> _loadAsync(DaliKey key) async {
     /*var cacheManager = await CacheManager.getInstance();
     var file = await cacheManager.getFile(url, headers: headers);*/
     if (cacheManager == null) {
-      cacheManager =
-          new DaliCacheManager(cacheFolder: (await getTemporaryDirectory()).path, downloader: DownloaderImpl());
-    }
-    var file = await cacheManager.getFile(url, width, height);
-
-    if (file == null) {
-      if (errorListener != null) errorListener();
-      throw new Exception("Couldn't download or retreive file.");
+      cacheManager = DaliCacheManager(cacheFolder: (await getTemporaryDirectory()).path, downloader: DownloaderImpl());
     }
     try {
+      File file = await cacheManager.getFile(url, width, height);
       return await _loadAsyncFromFile(key, file);
     } catch (e) {
-      print(e);
-      errorListener();
+      if (debug) print(e);
+      if (errorListener != null) errorListener();
     }
     return null;
   }
@@ -92,18 +92,11 @@ class DaliImageProvider extends ImageProvider<DaliKey> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is DaliKey &&
-              url == other.url &&
-              scale == other.scale &&
-              width == other.width &&
+          other is DaliKey && url == other.url && scale == other.scale && width == other.width &&
               height == other.height;
 
   @override
-  int get hashCode =>
-      url.hashCode ^
-      scale.hashCode ^
-      width.hashCode ^
-      height.hashCode;
+  int get hashCode => url.hashCode ^ scale.hashCode ^ width.hashCode ^ height.hashCode;
 
   @override
   String toString() => '$runtimeType("$url", scale: $scale, size: ($width,$height))';
@@ -120,17 +113,9 @@ class DaliKey {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is DaliKey &&
-              url == other.url &&
-              scale == other.scale &&
-              width == other.width &&
+          other is DaliKey && url == other.url && scale == other.scale && width == other.width &&
               height == other.height;
 
   @override
-  int get hashCode =>
-      url.hashCode ^
-      scale.hashCode ^
-      width.hashCode ^
-      height.hashCode;
-
+  int get hashCode => url.hashCode ^ scale.hashCode ^ width.hashCode ^ height.hashCode;
 }

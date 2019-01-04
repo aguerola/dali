@@ -14,6 +14,7 @@ import 'dart:isolate';
 ///
 /// Idle [Isolates] will die after [SiteSetting.workerTimeout].
 class Site {
+  static bool debug = false;
 
   /// Controls the whole behaviour of this Site and all its Isolates
   ///
@@ -46,13 +47,12 @@ class Site {
   ///
   /// Will wait for current working Isolates if [SiteSettings.workersMax] is indeed
   /// exceeded and all other Isolates are busy.
-  Future<dynamic> commission(Function function,
-      {List positionalArgs: const [], Map namedArgs: const{}}) async {
-    BackgroundFunction backgroundFunction = new BackgroundFunction(function,
-        positionalArguments: positionalArgs, namedArguments: namedArgs??{});
+  Future<dynamic> commission(Function function, {List positionalArgs: const [], Map namedArgs: const {}}) async {
+    BackgroundFunction backgroundFunction =
+        new BackgroundFunction(function, positionalArguments: positionalArgs, namedArguments: namedArgs ?? {});
 
     _Job job = new _Job(this, backgroundFunction);
-    _jobs.add(job);
+    _jobs.addFirst(job);
     patrol();
 
     await for (dynamic finished in streamController.stream) {
@@ -72,21 +72,18 @@ class Site {
     _workers.forEach((worker) => worker.incite());
     if (_jobs.isNotEmpty) {
       if (_workers.length < settings.workersMax) {
-        this._workers.add(
-            new _Worker(this)
-              ..start()
-              ..incite());
-        print("Site: Spawning worker. Total ${_workers.length}");
+        this._workers.add(new _Worker(this)
+          ..start()
+          ..incite());
+        if (debug) print("Site: Spawning worker. Total ${_workers.length}");
       }
     }
   }
 
-
   void _reportDeathOf(_Worker worker) {
     this._workers.remove(worker);
-    print("Site: Worker $worker died. Left: ${_workers.length}");
+    if (debug) print("Site: Worker $worker died. Left: ${_workers.length}");
   }
-
 
   /// Will shut down this [Site] and kill all
   /// open resources/[Isolate]s
@@ -110,7 +107,6 @@ class Site {
 
 /// All preferences for a [Site]
 class SiteSetting {
-
   /// How many worker [Isolates] can be spawned at max?
   final int workersMax;
 
@@ -132,18 +128,14 @@ class SiteSetting {
   /// killing idle [Isolate]s after 1 second.
   static const SiteSetting LIGHT = const SiteSetting(2, const Duration(seconds: 1));
 
-
   const SiteSetting(this.workersMax, this.workerTimeout);
 }
-
-
 
 /// Manages the connection to a dedicated [Isolate].
 ///
 /// Manages its own [Isolate] and is able
 /// to work on [_Job] objects.
 class _Worker {
-
   /// The site this worker belongs to
   Site site;
 
@@ -179,20 +171,19 @@ class _Worker {
   void incite() {
     if (_currentJob == null && site._jobs.isNotEmpty) {
       _currentJob = site._jobs.removeFirst();
-      print("Worker: start workiing on $_currentJob");
+      if (Site.debug) print("Worker: start workiing on $_currentJob");
       _startWorking();
     }
   }
-
 
   /// Send the [_Job] object [_currentJob] to the Isolate,
   /// which will start working on it.
   void _startWorking() {
     assert(_currentJob != null);
-    if(_sendPort!=null){
-      print("Worker: delegating to isolate");
+    if (_sendPort != null) {
+      if (Site.debug) print("Worker: delegating to isolate");
       _sendPort.send(_currentJob.function);
-      print("Worker: waiting for isolate to finish");
+      if (Site.debug) print("Worker: waiting for isolate to finish");
     }
   }
 
@@ -200,7 +191,7 @@ class _Worker {
   /// [_currentJob] and will "finish" the associated future
   /// by assigning the result [x] to it.
   void _receive(dynamic x) {
-    assert (_currentJob != null);
+    assert(_currentJob != null);
     _currentJob.result = x;
     _currentJob = null;
     incite();
@@ -221,22 +212,18 @@ class _Worker {
     _receivePort = new ReceivePort();
 
     _WorkDay _workDay = new _WorkDay(site.settings, _receivePort.sendPort);
-    _isolate =
-    await Isolate.spawn(_entryPoint, _workDay, onExit: exitReceiver.sendPort);
+    _isolate = await Isolate.spawn(_entryPoint, _workDay, onExit: exitReceiver.sendPort);
 
     int counter = 0;
     _receivePort.listen((x) {
-      if(counter == 0){
+      if (counter == 0) {
         _sendPort = x;
-        if(_currentJob!=null) _startWorking();
-      }
-      else _receive(x);
-      counter ++;
+        if (_currentJob != null) _startWorking();
+      } else
+        _receive(x);
+      counter++;
     });
-
-
   }
-
 
   /// Will kill the [Isolate] and this Worker should
   /// never be used again!
@@ -249,27 +236,24 @@ class _Worker {
     _currentJob = null;
   }
 
-
   /// The entry point of [_isolate].
   static void _entryPoint(_WorkDay workDay) {
     ReceivePort receivePort = new ReceivePort();
-    Stream receiveStream = receivePort.timeout(workDay.settings.workerTimeout,
-        onTimeout: (EventSink sink) {
-          print("Worker: timed out...");
-          receivePort.close();
-        });
+    Stream receiveStream = receivePort.timeout(workDay.settings.workerTimeout, onTimeout: (EventSink sink) {
+      if (Site.debug) print("Worker: timed out...");
+      receivePort.close();
+    });
 
     receiveStream.listen((backgroundFunction) {
-      print("Worker: working");
+      if (Site.debug) print("Worker: working");
       var result = backgroundFunction();
       workDay.sendPort.send(result);
-      print("Worker: idle");
+      if (Site.debug) print("Worker: idle");
     });
 
     workDay.sendPort.send(receivePort.sendPort);
   }
 }
-
 
 /// The initial object sent to a [Isolate] by a [_Worker]
 class _WorkDay {
@@ -278,8 +262,6 @@ class _WorkDay {
 
   _WorkDay(this.settings, this.sendPort);
 }
-
-
 
 class _Job {
   final Site _site;
@@ -305,12 +287,10 @@ class BackgroundFunction {
   final List positionalArguments;
   final Map<Symbol, dynamic> namedArguments = Map<Symbol, dynamic>();
 
-  BackgroundFunction(this.function,
-      {this.positionalArguments: const[],
-        namedArguments: Map}){
+  BackgroundFunction(this.function, {this.positionalArguments: const [], namedArguments: Map}) {
     var bla = namedArguments as Map<dynamic, dynamic>;
 
-    bla.forEach((s,v)=>namedArguments[s]=v);
+    bla.forEach((s, v) => namedArguments[s] = v);
   }
 
   dynamic call() {

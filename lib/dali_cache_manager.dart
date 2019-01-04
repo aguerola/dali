@@ -7,9 +7,9 @@ import 'package:flutter/foundation.dart';
 import 'dart:ui' as ui;
 import 'package:image/image.dart';
 
-final bool debug = true;
 
 class DaliCacheManager {
+static bool debug = false;
   static DaliCacheManager _instance;
 
   static get instance {
@@ -21,7 +21,7 @@ class DaliCacheManager {
 
   DaliCacheManager({@required this.cacheFolder, @required this.downloader});
 
-  static var site = new Site(new SiteSetting(4, new Duration(seconds: 10)));
+  static var site = new Site(new SiteSetting(2, new Duration(seconds: 10)));
 
   int getRoundedSize(int size) {
     if (size == null) {
@@ -52,58 +52,38 @@ class DaliCacheManager {
   Future<File> downloadFile(String url, int width, int height) async {
     width = getRoundedSize(width).toInt();
     height = getRoundedSize(height).toInt();
-    String filename = "${url.hashCode} - $width x $height";
+    String fullSizeFileName = "${url.hashCode}";
+    String resizeFileName = "$fullSizeFileName - $width x $height";
 
-    File file = new File('$cacheFolder/$filename');
-    bool exists = await file.exists();
-    bool empty = exists ? await file.length() == 0 : true;
+    File resizedFile = new File('$cacheFolder/$resizeFileName');
+    File fullSizeFile = new File('$cacheFolder/$fullSizeFileName');
 
-    String filenameOrig = "${url.hashCode}";
-    File fileOrig = new File('$cacheFolder/$filenameOrig');
-    bool origExists = await fileOrig.exists();
-
-    if (!origExists && !exists) {
-      if (debug) print("!origExists && !exists");
-      await downloader.downloadAndSave(url, fileOrig);
-      if (width != null && height != null) {
-        convertAndSaveInBackground(fileOrig, file, width, height);
-      }
-      if (debug) print("return fileOrig");
-      return fileOrig;
-    }
-
-    if (origExists && !exists) {
-      if (debug) print("origExists:OK && !exists");
-      if (width != null && height != null) {
-        convertAndSaveInBackground(fileOrig, file, width, height);
-      }
-      if (debug) print("return fileOrig");
-      return fileOrig;
-    }
-
-    if (!origExists && exists) {
-      if (!empty) {
-        if (debug) print("!origExists && exists:OK  && !isEmpty");
-        downloader.downloadAndSave(url, fileOrig);
-        if (debug) print("return file");
-        return file;
+    if (await resizedFile.exists()) {
+      if (await resizedFile.length() == 0) {
+        return fullSizeFile;
       } else {
-        if (debug) print("!origExists && exists:OK && isEmpty");
-        await downloader.downloadAndSave(url, fileOrig);
-        if (debug) print("return fileOrig");
-        return fileOrig;
+        return resizedFile;
       }
     }
 
-    if (!empty) {
-      if (debug) print("OK");
-      if (debug) print("return file");
-      return file;
-    } else {
-      if (debug) print("OK");
-      if (debug) print("return fileOrig");
-      return fileOrig;
+    if (await fullSizeFile.exists()) {
+      if (await fullSizeFile.length() == 0) {
+        throw Exception("Non supported format");
+      }
+      convertAndSaveInBackground(fullSizeFile, resizedFile, width, height);
+      return fullSizeFile;
     }
+
+    bool success = await downloadAndSave(url, fullSizeFile, checkFormat: true);
+    if (!success) {
+      throw Exception("Non supported format");
+    }
+    if (await fullSizeFile.exists()) {
+      convertAndSaveInBackground(fullSizeFile, resizedFile, width, height);
+      return fullSizeFile;
+    }
+
+    throw Exception("Error obtaining the image");
   }
 
   static CompressionResult compress(Uint8List data, int width, int height) {
@@ -119,26 +99,31 @@ class DaliCacheManager {
     }
     return CompressionResult(CompressionResult.RESULT_SAME_IMAGE, data);
   }
+
+  Future<bool> downloadAndSave(String url, File fileOrig, {bool checkFormat=false}) async {
+    bool success = false;
+    var bytes = await downloader.download(url);
+    if (checkFormat && findDecoderForData(bytes) == null) {
+      await fileOrig.writeAsBytes([]);
+      success = false;
+    } else {
+      await fileOrig.writeAsBytes(bytes);
+      success = true;
+    }
+    return success;
+  }
 }
 
 abstract class Downloader {
-  Future<void> downloadAndSave(String url, File file);
+  Future<List<int>> download(String url);
 }
 
 class DownloaderImpl implements Downloader {
   static var httpClient = new HttpClient();
 
   @override
-  Future<void> downloadAndSave(String url, File file) async {
-    if (debug) print("downloadAndSave - init");
-    var bytes = await download(url);
-    await file.writeAsBytes(bytes);
-    if (debug) print("downloadAndSave - end");
-    return null;
-  }
-
   Future<List<int>> download(String url) async {
-    if (debug) print("Downloading image: $url");
+    if (DaliCacheManager.debug) print("Downloading image: $url");
     var request = await httpClient.getUrl(Uri.parse(url));
     var response = await request.close();
     Uint8List bytes = await consolidateHttpClientResponseBytes(response);
@@ -157,7 +142,7 @@ class CompressionResult {
 }
 
 Future<bool> convertAndSaveInBackground(File fileOrig, File fileDestination, int width, int height) async {
-  if (debug) print("convertAndSaveInBackground - init");
+  if (DaliCacheManager.debug) print("convertAndSaveInBackground - init");
   List<int> bytes = await fileOrig.readAsBytes();
 
   if (width != null && width > 0 && height != null && height > 0) {
@@ -171,16 +156,16 @@ Future<bool> convertAndSaveInBackground(File fileOrig, File fileDestination, int
         /// you can specify the positional arguments here
         positionalArgs: [bytes, width, height]);
     if (result.result == CompressionResult.RESULT_OK) {
-      if (debug) print("convertAndSaveInBackground - saving resized image");
+      if (DaliCacheManager.debug) print("convertAndSaveInBackground - saving resized image");
       await fileDestination.writeAsBytes(result.data);
-      if (debug) print("convertAndSaveInBackground - end");
+      if (DaliCacheManager.debug) print("convertAndSaveInBackground - end");
       return true;
     } else if (result.result == CompressionResult.RESULT_SAME_IMAGE) {
       await fileDestination.writeAsBytes([]);
-      if (debug) print("convertAndSaveInBackground - end");
+      if (DaliCacheManager.debug) print("convertAndSaveInBackground - end");
       return true;
     }
   }
-  if (debug) print("convertAndSaveInBackground - end");
+  if (DaliCacheManager.debug) print("convertAndSaveInBackground - end");
   return false;
 }
