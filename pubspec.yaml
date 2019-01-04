@@ -1,6 +1,6 @@
 name: dali
 description: An image loading and caching library for flutter. Supports iOS and Android
-version: 0.0.7
+version: 0.0.8
 author: Antonio Martinez Guerola <a.guerola@gmail.com>
 homepage: https://github.com/aguerola/dali
 

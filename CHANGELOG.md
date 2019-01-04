@@ -1,3 +1,6 @@
+## [0.0.8] - 4/1/2019
+* Manage non supported format errors
+
 ## [0.0.7] - 24/12/2018
 * Some classes have been renamed
 * Updated readme file
