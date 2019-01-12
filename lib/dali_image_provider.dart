@@ -15,7 +15,7 @@ class DaliImageProvider extends ImageProvider<DaliKey> {
   /// When the image fails to load [errorListener] is called.
   static bool debug = false;
 
-  DaliImageProvider(this.url, {this.width, this.height, this.errorListener, this.headers, this.scale = 1.0})
+  DaliImageProvider(this.url, {this.width, this.height, this.errorListener, this.scale = 1.0})
       : assert(url != null),
         assert(scale != null);
 
@@ -28,13 +28,10 @@ class DaliImageProvider extends ImageProvider<DaliKey> {
   final int width;
   final int height;
 
-  DaliCacheManager cacheManager;
+  static DaliCacheManager cacheManager;
 
   /// Listener to be called when images fails to load.
   final ErrorListener errorListener;
-
-  // Set headers for the image provider, for example for authentication
-  final Map<String, String> headers;
 
   @override
   Future<DaliKey> obtainKey(ImageConfiguration configuration) {
@@ -67,7 +64,7 @@ class DaliImageProvider extends ImageProvider<DaliKey> {
       cacheManager = DaliCacheManager(cacheFolder: (await getTemporaryDirectory()).path, downloader: DownloaderImpl());
     }
     try {
-      File file = await cacheManager.getFile(url, width, height);
+      File file = await cacheManager.getFile(url, width, height, scale);
       return await _loadAsyncFromFile(key, file);
     } catch (e) {
       if (debug) print(e);

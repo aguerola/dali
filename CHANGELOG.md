@@ -1,3 +1,6 @@
+## [0.0.9] - 12/1/2019
+* Scale parameter
+
 ## [0.0.8] - 4/1/2019
 * Manage non supported format errors
 

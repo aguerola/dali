@@ -7,21 +7,17 @@ import 'package:flutter/foundation.dart';
 import 'dart:ui' as ui;
 import 'package:image/image.dart';
 
-
 class DaliCacheManager {
-static bool debug = false;
-  static DaliCacheManager _instance;
-
-  static get instance {
-    if (_instance == null) {}
-  }
+  static bool debug = false;
+  static int workersMax = 2;
+  static int workerTimeoutInSeconds = 2;
 
   final String cacheFolder;
   final Downloader downloader;
 
   DaliCacheManager({@required this.cacheFolder, @required this.downloader});
 
-  static var site = new Site(new SiteSetting(2, new Duration(seconds: 10)));
+  var site = new Site(new SiteSetting(workersMax, new Duration(seconds: workerTimeoutInSeconds)));
 
   int getRoundedSize(int size) {
     if (size == null) {
@@ -39,12 +35,12 @@ static bool debug = false;
     }
   }
 
-  Future<File> getFile(String url, int width, int height) async {
+  Future<File> getFile(String url, int width, int height, double scale) async {
     if (width != null) {
-      width = width * ui.window.devicePixelRatio.toInt();
+      width = (width * scale * ui.window.devicePixelRatio).toInt();
     }
     if (height != null) {
-      height = height * ui.window.devicePixelRatio.toInt();
+      height = (height * scale * ui.window.devicePixelRatio).toInt();
     }
     return downloadFile(url, width, height);
   }
@@ -100,7 +96,7 @@ static bool debug = false;
     return CompressionResult(CompressionResult.RESULT_SAME_IMAGE, data);
   }
 
-  Future<bool> downloadAndSave(String url, File fileOrig, {bool checkFormat=false}) async {
+  Future<bool> downloadAndSave(String url, File fileOrig, {bool checkFormat = false}) async {
     bool success = false;
     var bytes = await downloader.download(url);
     if (checkFormat && findDecoderForData(bytes) == null) {
@@ -111,6 +107,35 @@ static bool debug = false;
       success = true;
     }
     return success;
+  }
+
+  Future<bool> convertAndSaveInBackground(File fileOrig, File fileDestination, int width, int height) async {
+    if (DaliCacheManager.debug) print("convertAndSaveInBackground - init");
+    List<int> bytes = await fileOrig.readAsBytes();
+
+    if (width != null && width > 0 && height != null && height > 0) {
+      //bytes = compress(bytes, width, height);
+      CompressionResult result = await site.commission(
+
+          /// The very, very expensive function which compresses
+          /// images using a dart library
+          DaliCacheManager.compress,
+
+          /// you can specify the positional arguments here
+          positionalArgs: [bytes, width, height]);
+      if (result.result == CompressionResult.RESULT_OK) {
+        if (DaliCacheManager.debug) print("convertAndSaveInBackground - saving resized image");
+        await fileDestination.writeAsBytes(result.data);
+        if (DaliCacheManager.debug) print("convertAndSaveInBackground - end");
+        return true;
+      } else if (result.result == CompressionResult.RESULT_SAME_IMAGE) {
+        await fileDestination.writeAsBytes([]);
+        if (DaliCacheManager.debug) print("convertAndSaveInBackground - end");
+        return true;
+      }
+    }
+    if (DaliCacheManager.debug) print("convertAndSaveInBackground - end");
+    return false;
   }
 }
 
@@ -139,33 +164,4 @@ class CompressionResult {
   final Uint8List data;
 
   CompressionResult(this.result, this.data);
-}
-
-Future<bool> convertAndSaveInBackground(File fileOrig, File fileDestination, int width, int height) async {
-  if (DaliCacheManager.debug) print("convertAndSaveInBackground - init");
-  List<int> bytes = await fileOrig.readAsBytes();
-
-  if (width != null && width > 0 && height != null && height > 0) {
-    //bytes = compress(bytes, width, height);
-    CompressionResult result = await DaliCacheManager.site.commission(
-
-        /// The very, very expensive function which compresses
-        /// images using a dart library
-        DaliCacheManager.compress,
-
-        /// you can specify the positional arguments here
-        positionalArgs: [bytes, width, height]);
-    if (result.result == CompressionResult.RESULT_OK) {
-      if (DaliCacheManager.debug) print("convertAndSaveInBackground - saving resized image");
-      await fileDestination.writeAsBytes(result.data);
-      if (DaliCacheManager.debug) print("convertAndSaveInBackground - end");
-      return true;
-    } else if (result.result == CompressionResult.RESULT_SAME_IMAGE) {
-      await fileDestination.writeAsBytes([]);
-      if (DaliCacheManager.debug) print("convertAndSaveInBackground - end");
-      return true;
-    }
-  }
-  if (DaliCacheManager.debug) print("convertAndSaveInBackground - end");
-  return false;
 }

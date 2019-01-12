@@ -4,7 +4,7 @@ import 'package:dali/cached_image.dart';
 import 'package:flutter/widgets.dart';
 
 export 'package:dali/cached_image.dart';
-export 'package:dali/cached_image_provider.dart';
+export 'package:dali/dali_image_provider.dart';
 
 class Dali extends StatelessWidget {
   final String imageUrl;

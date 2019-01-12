@@ -2,8 +2,7 @@ library cached_image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:dali/cached_image_provider.dart';
-
+import 'package:dali/dali_image_provider.dart';
 
 class CachedImage extends StatefulWidget {
   static List<Object> _registeredErrors = <Object>[];
@@ -219,8 +218,8 @@ class _CachedNetworkImageState extends State<CachedImage> with TickerProviderSta
       width = widget.width.toInt();
       height = widget.height.toInt();
     }
-    _imageProvider = new DaliImageProvider(widget.imageUrl,width: width,height: height,
-        headers: widget.httpHeaders, errorListener: _imageLoadingFailed);
+    _imageProvider =
+        new DaliImageProvider(widget.imageUrl, width: width, height: height, errorListener: _imageLoadingFailed);
     _imageResolver = new _ImageProviderResolver(state: this, listener: _updatePhase);
 
     _controller = new AnimationController(
@@ -261,8 +260,8 @@ class _CachedNetworkImageState extends State<CachedImage> with TickerProviderSta
         width = widget.width.toInt();
         height = widget.height.toInt();
       }
-      _imageProvider = new DaliImageProvider(widget.imageUrl,
-          width: width, height: height, errorListener: _imageLoadingFailed);
+      _imageProvider =
+          new DaliImageProvider(widget.imageUrl, width: width, height: height, errorListener: _imageLoadingFailed);
 
       _resolveImage();
     }
