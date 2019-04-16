@@ -178,7 +178,9 @@ class _ImageProviderResolver {
   void resolve(DaliImageProvider provider) {
     final ImageStream oldImageStream = _imageStream;
     _imageStream = provider.resolve(createLocalImageConfiguration(state.context,
-        size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null));
+        size: widget.width != null && widget.height != null
+            ? new Size(widget.width, widget.height)
+            : null));
 
     if (_imageStream.key != oldImageStream?.key) {
       oldImageStream?.removeListener(_handleImageChanged);
@@ -196,7 +198,8 @@ class _ImageProviderResolver {
   }
 }
 
-class _CachedNetworkImageState extends State<CachedImage> with TickerProviderStateMixin {
+class _CachedNetworkImageState extends State<CachedImage>
+    with TickerProviderStateMixin {
   _ImageProviderResolver _imageResolver;
   DaliImageProvider _imageProvider;
 
@@ -218,9 +221,10 @@ class _CachedNetworkImageState extends State<CachedImage> with TickerProviderSta
       width = widget.width.toInt();
       height = widget.height.toInt();
     }
-    _imageProvider =
-        new DaliImageProvider(widget.imageUrl, width: width, height: height, errorListener: _imageLoadingFailed);
-    _imageResolver = new _ImageProviderResolver(state: this, listener: _updatePhase);
+    _imageProvider = new DaliImageProvider(widget.imageUrl,
+        width: width, height: height, errorListener: _imageLoadingFailed);
+    _imageResolver =
+        new _ImageProviderResolver(state: this, listener: _updatePhase);
 
     _controller = new AnimationController(
       value: 1.0,
@@ -240,7 +244,9 @@ class _CachedNetworkImageState extends State<CachedImage> with TickerProviderSta
 
   @override
   void didChangeDependencies() {
-    _imageProvider.obtainKey(createLocalImageConfiguration(context)).then<void>((DaliKey key) {
+    _imageProvider
+        .obtainKey(createLocalImageConfiguration(context))
+        .then<void>((DaliKey key) {
       if (CachedImage._registeredErrors.contains(key)) {
         setState(() => _hasError = true);
       }
@@ -253,15 +259,16 @@ class _CachedNetworkImageState extends State<CachedImage> with TickerProviderSta
   @override
   void didUpdateWidget(CachedImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.imageUrl != oldWidget.imageUrl || widget.placeholder != widget.placeholder) {
+    if (widget.imageUrl != oldWidget.imageUrl ||
+        widget.placeholder != widget.placeholder) {
       int width;
       int height;
       if (widget != null) {
         width = widget.width.toInt();
         height = widget.height.toInt();
       }
-      _imageProvider =
-          new DaliImageProvider(widget.imageUrl, width: width, height: height, errorListener: _imageLoadingFailed);
+      _imageProvider = new DaliImageProvider(widget.imageUrl,
+          width: width, height: height, errorListener: _imageLoadingFailed);
 
       _resolveImage();
     }
@@ -365,7 +372,9 @@ class _CachedNetworkImageState extends State<CachedImage> with TickerProviderSta
   }
 
   void _imageLoadingFailed() {
-    _imageProvider.obtainKey(createLocalImageConfiguration(context)).then<void>((DaliKey key) {
+    _imageProvider
+        .obtainKey(createLocalImageConfiguration(context))
+        .then<void>((DaliKey key) {
       if (!CachedImage._registeredErrors.contains(key)) {
         CachedImage._registeredErrors.add(key);
       }
@@ -411,8 +420,10 @@ class _CachedNetworkImageState extends State<CachedImage> with TickerProviderSta
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<ImagePhase>('phase', _phase));
-    description.add(new DiagnosticsProperty<ImageInfo>('pixels', _imageResolver._imageInfo));
-    description.add(new DiagnosticsProperty<ImageStream>('image stream', _imageResolver._imageStream));
+    description.add(new DiagnosticsProperty<ImageInfo>(
+        'pixels', _imageResolver._imageInfo));
+    description.add(new DiagnosticsProperty<ImageStream>(
+        'image stream', _imageResolver._imageStream));
   }
 }
 

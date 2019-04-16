@@ -1,3 +1,6 @@
+## [0.0.11] - 16/4/2019
+* Formatted files
+
 ## [0.0.10] - 12/1/2019
 * Scale parameter
 

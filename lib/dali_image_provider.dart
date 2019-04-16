@@ -15,7 +15,8 @@ class DaliImageProvider extends ImageProvider<DaliKey> {
   /// When the image fails to load [errorListener] is called.
   static bool debug = false;
 
-  DaliImageProvider(this.url, {this.width, this.height, this.errorListener, this.scale = 1.0})
+  DaliImageProvider(this.url,
+      {this.width, this.height, this.errorListener, this.scale = 1.0})
       : assert(url != null),
         assert(scale != null);
 
@@ -61,7 +62,9 @@ class DaliImageProvider extends ImageProvider<DaliKey> {
     /*var cacheManager = await CacheManager.getInstance();
     var file = await cacheManager.getFile(url, headers: headers);*/
     if (cacheManager == null) {
-      cacheManager = DaliCacheManager(cacheFolder: (await getTemporaryDirectory()).path, downloader: DownloaderImpl());
+      cacheManager = DaliCacheManager(
+          cacheFolder: (await getTemporaryDirectory()).path,
+          downloader: DownloaderImpl());
     }
     try {
       File file = await cacheManager.getFile(url, width, height, scale);
@@ -77,7 +80,9 @@ class DaliImageProvider extends ImageProvider<DaliKey> {
     assert(key.hashCode == this.hashCode);
 
     final Uint8List bytes = await file.readAsBytes();
-    if (debug) print("size: ${(bytes.lengthInBytes / (1024 * 1024)).toStringAsFixed(2)} MB");
+    if (debug)
+      print(
+          "size: ${(bytes.lengthInBytes / (1024 * 1024)).toStringAsFixed(2)} MB");
     if (bytes.lengthInBytes == 0) {
       if (errorListener != null) errorListener();
       throw new Exception("File was empty");
@@ -89,14 +94,19 @@ class DaliImageProvider extends ImageProvider<DaliKey> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is DaliKey && url == other.url && scale == other.scale && width == other.width &&
-              height == other.height;
+      other is DaliKey &&
+          url == other.url &&
+          scale == other.scale &&
+          width == other.width &&
+          height == other.height;
 
   @override
-  int get hashCode => url.hashCode ^ scale.hashCode ^ width.hashCode ^ height.hashCode;
+  int get hashCode =>
+      url.hashCode ^ scale.hashCode ^ width.hashCode ^ height.hashCode;
 
   @override
-  String toString() => '$runtimeType("$url", scale: $scale, size: ($width,$height))';
+  String toString() =>
+      '$runtimeType("$url", scale: $scale, size: ($width,$height))';
 }
 
 class DaliKey {
@@ -110,9 +120,13 @@ class DaliKey {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is DaliKey && url == other.url && scale == other.scale && width == other.width &&
-              height == other.height;
+      other is DaliKey &&
+          url == other.url &&
+          scale == other.scale &&
+          width == other.width &&
+          height == other.height;
 
   @override
-  int get hashCode => url.hashCode ^ scale.hashCode ^ width.hashCode ^ height.hashCode;
+  int get hashCode =>
+      url.hashCode ^ scale.hashCode ^ width.hashCode ^ height.hashCode;
 }

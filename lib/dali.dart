@@ -12,7 +12,8 @@ class Dali extends StatelessWidget {
   final Widget errorWidget;
   final BoxFit fit;
 
-  Dali(this.imageUrl, {this.placeholder, this.errorWidget, this.fit=BoxFit.cover});
+  Dali(this.imageUrl,
+      {this.placeholder, this.errorWidget, this.fit = BoxFit.cover});
 
   @override
   Widget build(BuildContext context) {

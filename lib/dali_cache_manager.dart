@@ -17,7 +17,8 @@ class DaliCacheManager {
 
   DaliCacheManager({@required this.cacheFolder, @required this.downloader});
 
-  var site = new Site(new SiteSetting(workersMax, new Duration(seconds: workerTimeoutInSeconds)));
+  var site = new Site(new SiteSetting(
+      workersMax, new Duration(seconds: workerTimeoutInSeconds)));
 
   int getRoundedSize(int size) {
     if (size == null) {
@@ -96,7 +97,8 @@ class DaliCacheManager {
     return CompressionResult(CompressionResult.RESULT_SAME_IMAGE, data);
   }
 
-  Future<bool> downloadAndSave(String url, File fileOrig, {bool checkFormat = false}) async {
+  Future<bool> downloadAndSave(String url, File fileOrig,
+      {bool checkFormat = false}) async {
     bool success = false;
     var bytes = await downloader.download(url);
     if (checkFormat && findDecoderForData(bytes) == null) {
@@ -109,7 +111,8 @@ class DaliCacheManager {
     return success;
   }
 
-  Future<bool> convertAndSaveInBackground(File fileOrig, File fileDestination, int width, int height) async {
+  Future<bool> convertAndSaveInBackground(
+      File fileOrig, File fileDestination, int width, int height) async {
     if (DaliCacheManager.debug) print("convertAndSaveInBackground - init");
     List<int> bytes = await fileOrig.readAsBytes();
 
@@ -124,7 +127,8 @@ class DaliCacheManager {
           /// you can specify the positional arguments here
           positionalArgs: [bytes, width, height]);
       if (result.result == CompressionResult.RESULT_OK) {
-        if (DaliCacheManager.debug) print("convertAndSaveInBackground - saving resized image");
+        if (DaliCacheManager.debug)
+          print("convertAndSaveInBackground - saving resized image");
         await fileDestination.writeAsBytes(result.data);
         if (DaliCacheManager.debug) print("convertAndSaveInBackground - end");
         return true;

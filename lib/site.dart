@@ -47,9 +47,10 @@ class Site {
   ///
   /// Will wait for current working Isolates if [SiteSettings.workersMax] is indeed
   /// exceeded and all other Isolates are busy.
-  Future<dynamic> commission(Function function, {List positionalArgs: const [], Map namedArgs: const {}}) async {
-    BackgroundFunction backgroundFunction =
-        new BackgroundFunction(function, positionalArguments: positionalArgs, namedArguments: namedArgs ?? {});
+  Future<dynamic> commission(Function function,
+      {List positionalArgs: const [], Map namedArgs: const {}}) async {
+    BackgroundFunction backgroundFunction = new BackgroundFunction(function,
+        positionalArguments: positionalArgs, namedArguments: namedArgs ?? {});
 
     _Job job = new _Job(this, backgroundFunction);
     _jobs.addFirst(job);
@@ -115,18 +116,21 @@ class SiteSetting {
 
   /// Will allow a maximum of 2 background [Isolate]s while
   /// killing idle [Isolate]s after 30 seconds
-  static const SiteSetting STANDARD = const SiteSetting(2, const Duration(seconds: 30));
+  static const SiteSetting STANDARD =
+      const SiteSetting(2, const Duration(seconds: 30));
 
   /// Will allow a maximum of 16 background [Isolate]s while
   /// killing idle [Isolate]s after 5 minutes.
   ///
   /// This is only for heavy multitasking applications.
   /// Not quite sure if Dart is the right language here!
-  static const SiteSetting HEAVY = const SiteSetting(16, const Duration(minutes: 5));
+  static const SiteSetting HEAVY =
+      const SiteSetting(16, const Duration(minutes: 5));
 
   /// Will allow a maximum of 2 background [Isolate] while
   /// killing idle [Isolate]s after 1 second.
-  static const SiteSetting LIGHT = const SiteSetting(2, const Duration(seconds: 1));
+  static const SiteSetting LIGHT =
+      const SiteSetting(2, const Duration(seconds: 1));
 
   const SiteSetting(this.workersMax, this.workerTimeout);
 }
@@ -212,7 +216,8 @@ class _Worker {
     _receivePort = new ReceivePort();
 
     _WorkDay _workDay = new _WorkDay(site.settings, _receivePort.sendPort);
-    _isolate = await Isolate.spawn(_entryPoint, _workDay, onExit: exitReceiver.sendPort);
+    _isolate = await Isolate.spawn(_entryPoint, _workDay,
+        onExit: exitReceiver.sendPort);
 
     int counter = 0;
     _receivePort.listen((x) {
@@ -239,7 +244,8 @@ class _Worker {
   /// The entry point of [_isolate].
   static void _entryPoint(_WorkDay workDay) {
     ReceivePort receivePort = new ReceivePort();
-    Stream receiveStream = receivePort.timeout(workDay.settings.workerTimeout, onTimeout: (EventSink sink) {
+    Stream receiveStream = receivePort.timeout(workDay.settings.workerTimeout,
+        onTimeout: (EventSink sink) {
       if (Site.debug) print("Worker: timed out...");
       receivePort.close();
     });
@@ -287,7 +293,8 @@ class BackgroundFunction {
   final List positionalArguments;
   final Map<Symbol, dynamic> namedArguments = Map<Symbol, dynamic>();
 
-  BackgroundFunction(this.function, {this.positionalArguments: const [], namedArguments: Map}) {
+  BackgroundFunction(this.function,
+      {this.positionalArguments: const [], namedArguments: Map}) {
     var bla = namedArguments as Map<dynamic, dynamic>;
 
     bla.forEach((s, v) => namedArguments[s] = v);
