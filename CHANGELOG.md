@@ -1,3 +1,6 @@
+## [0.0.12] - 25/4/2019
+* Fix androidx problem
+
 ## [0.0.11] - 16/4/2019
 * Formatted files
 

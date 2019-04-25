@@ -1,6 +1,6 @@
 name: dali
 description: A fast and efficient image downloading and caching library for flutter. Supports iOS and Android
-version: 0.0.11
+version: 0.0.12
 author: Antonio Martinez Guerola <a.guerola@gmail.com>
 homepage: https://github.com/aguerola/dali
 
@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   image: ^2.0.4
-  path_provider: ^0.4.1
+  path_provider: ^0.5.0+1
 
 dev_dependencies:
   flutter_test:
