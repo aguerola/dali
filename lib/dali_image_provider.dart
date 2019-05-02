@@ -46,9 +46,11 @@ class DaliImageProvider extends ImageProvider<DaliKey> {
       return new MultiFrameImageStreamCompleter(
           codec: _loadAsync(key),
           scale: key.scale,
-          informationCollector: (StringBuffer information) {
-            information.writeln('Image provider: $this');
-            information.write('Image key: $key');
+          informationCollector: () {
+            return [
+              DiagnosticsNode.message('Image provider: $this'),
+              DiagnosticsNode.message('Image key: $key')
+            ];
           });
     } catch (e) {
       if (debug) print(e);
