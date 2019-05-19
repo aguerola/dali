@@ -5,7 +5,7 @@ author: Antonio Martinez Guerola <a.guerola@gmail.com>
 homepage: https://github.com/aguerola/dali
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.3.0 <3.0.0"
 
 dependencies:
   flutter:
