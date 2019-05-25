@@ -161,7 +161,7 @@ enum ImagePhase {
 
 typedef void _ImageProviderResolverListener();
 
-class _ImageProviderResolver {
+class _ImageProviderResolver implements ImageStreamListener {
   _ImageProviderResolver({
     @required this.state,
     @required this.listener,
@@ -183,19 +183,28 @@ class _ImageProviderResolver {
             : null));
 
     if (_imageStream.key != oldImageStream?.key) {
-      oldImageStream?.removeListener(_handleImageChanged);
-      _imageStream.addListener(_handleImageChanged);
+      oldImageStream?.removeListener(this);
+      _imageStream.addListener(this);
     }
   }
 
-  void _handleImageChanged(ImageInfo imageInfo, bool synchronousCall) {
-    _imageInfo = imageInfo;
-    listener();
+  void stopListening() {
+    _imageStream?.removeListener(this);
   }
 
-  void stopListening() {
-    _imageStream?.removeListener(_handleImageChanged);
-  }
+  @override
+  // TODO: implement onChunk
+  get onChunk => null;
+
+  @override
+  // TODO: implement onError
+  get onError => null;
+
+  @override
+  get onImage => (ImageInfo imageInfo, bool synchronousCall) {
+    _imageInfo = imageInfo;
+    listener();
+  };
 }
 
 class _CachedNetworkImageState extends State<CachedImage>
